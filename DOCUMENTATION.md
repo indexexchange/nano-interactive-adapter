@@ -1,4 +1,4 @@
-# NanoInteractive
+# Nano Interactive
 ## General Compatibility
 |Feature|  |
 |---|---|
