@@ -59,6 +59,98 @@ function NanoInteractiveHtb(configs) {
      * Functions
      * ---------------------------------- */
 
+    /**
+     * SubId parameter
+     *
+     * @param bid
+     * @returns {string|null}
+     */
+    function createSubIdParam(bid) {
+        return bid.subId || null;
+    }
+
+    /**
+     * Referrer
+     *
+     * @param bid
+     * @returns {string|null}
+     */
+    function createRefParam(bid) {
+        var url = document.referrer;
+
+        try {
+            url = window.top.document.referrer;
+        } catch (e) {
+        }
+
+        return bid.ref ? null : url || null;
+    }
+
+    /**
+     * QueryString url
+     *
+     * @param param
+     * @returns {string|null}
+     */
+    function getParameterByName(param) {
+        var url = Browser.getPageUrl();
+        var urlParams = new URLSearchParams(url.substring(url.indexOf('?') + 1));
+        var myParam = urlParams.get(param);
+
+        return myParam || null;
+    }
+
+    /**
+     * Current page URL
+     *
+     * @returns {string}
+     */
+    function createLocationParam() {
+        return Browser.getPageUrl();
+    }
+
+    /**
+     * Category
+     *
+     * @param bid
+     * @returns string
+     */
+    function createCategoryParam(bid) {
+        return bid.category ? bid.category : null;
+    }
+
+    /**
+     * SearchKeyword param
+     *
+     * @param bid
+     * @returns string
+     */
+    function createNqParam(bid) {
+        return bid.name ? getParameterByName(bid.name) : bid.nq || null;
+    }
+
+    /**
+     * Single Bid Request
+     *
+     * @param bid
+     * @returns {*}
+     */
+    function createSingleBidRequest(bid) {
+        var nq = createNqParam(bid.xSlotRef);
+
+        return {
+            bidId: bid.xSlotName,
+            category: [createCategoryParam(bid.xSlotRef)],
+            cors: location.origin,
+            loc: createLocationParam(),
+            nq: Utilities.isArray(nq) ? nq : [nq] || null,
+            pid: bid.xSlotRef.pid,
+            ref: createRefParam(bid.xSlotRef),
+            sizes: bid.xSlotRef.sizes,
+            subId: createSubIdParam(bid.xSlotRef)
+        };
+    }
+
     /* Utilities
      * ---------------------------------- */
 
@@ -129,11 +221,24 @@ function NanoInteractiveHtb(configs) {
          */
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
-        var queryObj = {};
-        var callbackId = System.generateUniqueId();
+        var queryObj = [];
+
+        returnParcels.forEach(function (item) {
+            if (item.partnerId === 'NanoInteractiveHtb') {
+                var obj = createSingleBidRequest(item);
+
+                if (ComplianceService.isPrivacyEnabled()) {
+                    var consent = ComplianceService.gdpr.getConsent();
+                    obj.consentString = consent.consentString;
+                }
+                queryObj.push(obj);
+            }
+        });
+
+        // S var callbackId = System.generateUniqueId();
 
         /* Change this to your bidder endpoint. */
-        var baseUrl = Browser.getProtocol() + '//someAdapterEndpoint.com/bid';
+        var baseUrl = Browser.getProtocol() + '//www.audiencemanager.de/hb';
 
         /* ------------------------ Get consent information -------------------------
          * If you want to implement GDPR consent in your adapter, use the function
@@ -159,8 +264,6 @@ function NanoInteractiveHtb(configs) {
          * returned from gdpr.getConsent() are safe defaults and no attempt has been
          * made by the wrapper to contact a Consent Management Platform.
          */
-        var gdprStatus = ComplianceService.gdpr.getConsent();
-        var privacyEnabled = ComplianceService.isPrivacyEnabled();
 
         /* ---------------- Craft bid request using the above returnParcels --------- */
 
@@ -171,7 +274,10 @@ function NanoInteractiveHtb(configs) {
         return {
             url: baseUrl,
             data: queryObj,
-            callbackId: callbackId
+            networkParamOverrides: {
+                method: 'POST',
+                contentType: 'text/plain'
+            }
         };
     }
 
@@ -274,7 +380,7 @@ function NanoInteractiveHtb(configs) {
                  */
 
                 /* ----------- Fill this out to find a matching bid for the current parcel ------------- */
-                if (curReturnParcel.xSlotRef.someCriteria === bids[i].someCriteria) {
+                if (curReturnParcel.xSlotName === bids[i].id) {
                     curBid = bids[i];
                     bids.splice(i, 1);
 
@@ -298,7 +404,7 @@ function NanoInteractiveHtb(configs) {
              * these local variables */
 
             /* The bid price for the given slot */
-            var bidPrice = curBid.price;
+            var bidPrice = curBid.cpm;
 
             /* The size of the given slot */
             var bidSize = [Number(curBid.width), Number(curBid.height)];
@@ -306,10 +412,10 @@ function NanoInteractiveHtb(configs) {
             /* The creative/adm for the given slot that will be rendered if is the winner.
              * Please make sure the URL is decoded and ready to be document.written.
              */
-            var bidCreative = curBid.adm;
+            var bidCreative = curBid.ad;
 
             /* The dealId if applicable for this slot. */
-            var bidDealId = curBid.dealid;
+            var bidDealId = curBid.id;
 
             /* Explicitly pass */
             var bidIsPass = bidPrice <= 0;
@@ -438,11 +544,11 @@ function NanoInteractiveHtb(configs) {
             },
 
             /* The bid price unit (in cents) the endpoint returns, please refer to the readme for details */
-            bidUnitInCents: 1,
+            bidUnitInCents: 100,
             lineItemType: Constants.LineItemTypes.ID_AND_SIZE,
-            callbackType: Partner.CallbackTypes.ID,
+            callbackType: Partner.CallbackTypes.NONE,
             architecture: Partner.Architectures.SRA,
-            requestType: Partner.RequestTypes.ANY
+            requestType: Partner.RequestTypes.AJAX
         };
 
         /* --------------------------------------------------------------------------------------- */

@@ -41,7 +41,7 @@ Below you will find everything you need to complete the certification process an
     * Once the module has been verified submit a pull request from the `development-v2`branch to the `master-v2` branch for the Index Exchange team to review. If everything is approved, your adapter will be officially certified!
 
 # <a name='requirements'></a> Partner Requirements & Guidelines
-In order for your module to be successfully certified, please refer to the following list of requirements and guidelines. Items under required <b><u>must</b></u> be satisfied in order to pass the certification process. Items under guidelines are recommended for an optimal setup and should be followed if possible.
+In order for your module to be successfully certified, please refer to the following list of requirements and guidelines. Items under required <b><u>must</u></b> be satisfied in order to pass the certification process. Items under guidelines are recommended for an optimal setup and should be followed if possible.
 
 ### General
 
