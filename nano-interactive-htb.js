@@ -238,7 +238,7 @@ function NanoInteractiveHtb(configs) {
         // S var callbackId = System.generateUniqueId();
 
         /* Change this to your bidder endpoint. */
-        var baseUrl = Browser.getProtocol() + '//www.audiencemanager.de/hb';
+        var baseUrl = Browser.getProtocol() + '//ad.audiencemanager.de/hb';
 
         /* ------------------------ Get consent information -------------------------
          * If you want to implement GDPR consent in your adapter, use the function
