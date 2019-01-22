@@ -42,7 +42,7 @@ function getBidRequestRegex() {
 }
 
 function validateBidRequest(request) {
-    expect(request.host).toBe('www.audiencemanager.de');
+    expect(request.host).toBe('ad.audiencemanager.de');
 }
 
 function getValidResponse(request, creative) {
